@@ -10,23 +10,24 @@ with Vidocq.
 ## Installation
 
 Add this line to your application's Gemfile:
-
-    gem 'vidocq'
+```ruby
+gem 'vidocq'
+```
 
 And then execute:
 
     $ bundle
 
 Or install it yourself as:
-
     $ gem install vidocq
 
 ## Usage
-
-    require 'vidocq'
-    v = Vidocq.new('localhost:2181')
-    url = v.get_endpoint('finance-service','0.1')
-    # perform request to url...
+```ruby
+require 'vidocq'
+v = Vidocq.new('localhost:2181')
+url = v.get_endpoint('finance-service','0.1')
+# perform request to url...
+```
 
 ## Contributing
 
