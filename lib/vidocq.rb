@@ -1,4 +1,3 @@
-require 'ostruct'
 require 'json'
 require 'zk'
 
@@ -31,25 +30,27 @@ module Vidocq
     end
 
     # Lists all the services, versions and instances
-    # in a OpenStruct in hierarcical format which resembles
-    # the following:
+    # in an  hierarcical format like the following:
     #
     # [
     #   {:name => 'fooservice', :versions =>
-    #     {:number => '0.1', :instances =>
-    #       {:endpoint => 'http://198.0.0.1:8900/foo'}
-    #     }
-    #   },
-    #   ...
+    #     [
+    #       {:number => '0.1', :instances =>
+    #         [
+    #           {:endpoint => 'http://198.0.0.1:8900/foo'}, ...
+    #         ]
+    #       }, ...
+    #     ]
+    #   }, ...
     # ]
     #
     # Use it as follows:
     #   vidocq.services.each do |service|
-    #     puts service.name
-    #     service.versions.each do |version|
-    #       puts "- " + version.number
-    #       version.instance.each do |instance|
-    #         puts "  - " + instance.endpoint
+    #     puts service[:name]
+    #     service[:versions].each do |version|
+    #       puts "- " + version[:number]
+    #       version[:instances].each do |instance|
+    #         puts "  - " + instance[:endpoint]
     #       end
     #     end
     #   end
@@ -63,11 +64,11 @@ module Vidocq
           versions = zk.children(service_path).collect do |version|
             version_path = service_path + '/' + version
             instances = zk.children(version_path).collect do |instance|
-              OpenStruct.new(JSON.parse(zk.get(version_path + '/' + instance).first))
+              JSON.parse(zk.get(version_path + '/' + instance).first)
             end
-            OpenStruct.new({:number => version, :instances => instances})
+            {:number => version, :instances => instances}
           end
-          OpenStruct.new({:name => service, :versions => versions})
+          {:name => service, :versions => versions}
         end
       end
     end
