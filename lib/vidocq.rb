@@ -14,6 +14,11 @@ module Vidocq
       @cs = connect_string || 'localhost:2181'
     end
 
+    # Looks up all currently running instances of the
+    # specified service. Picks and arbitrary one and
+    # returns its instance. If the instance does not
+    # respond, call this method again until you get one
+    # that does.
     def get_endpoint(service_id, version)
       base_path = "/companybook/services/#{service_id}/#{version}"
       ZK.open(@cs) do |zk|
@@ -25,7 +30,30 @@ module Vidocq
       end
     end
 
-    def list_services
+    # Lists all the services, versions and instances
+    # in a OpenStruct in hierarcical format which resembles
+    # the following:
+    #
+    # [
+    #   {:name => 'fooservice', :versions =>
+    #     {:number => '0.1', :instances =>
+    #       {:endpoint => 'http://198.0.0.1:8900/foo'}
+    #     }
+    #   },
+    #   ...
+    # ]
+    #
+    # Use it as follows:
+    #   vidocq.services.each do |service|
+    #     puts service.name
+    #     service.versions.each do |version|
+    #       puts "- " + version.number
+    #       version.instance.each do |instance|
+    #         puts "  - " + instance.endpoint
+    #       end
+    #     end
+    #   end
+    def services
       base_path = "/companybook/services"
 
       ZK.open(@cs) do |zk|
