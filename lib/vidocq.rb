@@ -2,7 +2,6 @@ require 'json'
 require 'zk'
 
 module Vidocq
-  VERSION = "0.0.1"
 
   def self.new(connect_string = nil)
     Connection.new(connect_string)
