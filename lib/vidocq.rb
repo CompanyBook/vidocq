@@ -2,7 +2,6 @@ require 'json'
 require 'zk'
 
 module Vidocq
-
   def self.new(connect_string = nil)
     Connection.new(connect_string)
   end
@@ -13,7 +12,7 @@ module Vidocq
     end
 
     # Looks up all currently running instances of the
-    # specified service. Picks and arbitrary one and
+    # specified service. Picks an arbitrary one and
     # returns its instance. If the instance does not
     # respond, call this method again until you get one
     # that does.
@@ -42,17 +41,6 @@ module Vidocq
     #     ]
     #   }, ...
     # ]
-    #
-    # Use it as follows:
-    #   vidocq.services.each do |service|
-    #     puts service[:name]
-    #     service[:versions].each do |version|
-    #       puts "- " + version[:number]
-    #       version[:instances].each do |instance|
-    #         puts "  - " + instance[:endpoint]
-    #       end
-    #     end
-    #   end
     def services
       base_path = "/companybook/services"
 
