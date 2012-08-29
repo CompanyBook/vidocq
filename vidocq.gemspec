@@ -1,4 +1,4 @@
-require File.expand_path('../lib/vidocq', __FILE__)
+require File.expand_path('../lib/vidocq/version', __FILE__)
 
 Gem::Specification.new do |gem|
   gem.authors       = ["Alexander Mossin"]
