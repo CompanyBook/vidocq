@@ -15,4 +15,5 @@ Gem::Specification.new do |gem|
   gem.version       = Vidocq::VERSION
 
   gem.add_dependency('zk', '>= 1.6.4')
+  gem.add_dependency('httparty', '>= 0.8.3')
 end
