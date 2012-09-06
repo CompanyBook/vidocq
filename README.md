@@ -25,7 +25,7 @@ Or install it yourself as:
 ```ruby
 require 'vidocq'
 v = Vidocq.new('myzkserver:2181')
-response = v.call('finance-service','0.1','NO0000000995516055')
+response = v.call(:service_id => 'my-service', :version => '0.1', :id => '42')
 ```
 
 ## Contributing
