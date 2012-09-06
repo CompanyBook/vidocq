@@ -3,9 +3,6 @@ require 'json'
 require 'zk'
 
 module Vidocq
-  DEFAULT_RETRIES = 3
-  DEFAULT_PAUSE = 2
-
   class NoEndpointError < StandardError; end
   class NoResponseError < StandardError; end
 
@@ -29,9 +26,9 @@ module Vidocq
 
       base_path = "/companybook/services/#{service_id}/#{version}"
       ZK.open(@cs) do |zk|
-        return unless zk.exists?(base_path)
-        path = zk.children(base_path).sample
-        return unless path
+        children = get_children(zk, service_id, version)
+        return if children.empty?
+        path = children.sample
         data = JSON.parse(zk.get(base_path + '/' + path).first)
         data['endpoint']
       end
@@ -39,31 +36,32 @@ module Vidocq
 
     # Finds an endpoint and calls it with the given options.
     # If there is a connection failure, new attempts are
-    # made with new endpoints. Options:
-    # * :pause - the pause (in seconds) between retries.
-    # * :retries - max number of retries.
+    # made with new endpoints.
     #
     # Two failure modes are handled:
     # 1. There are no registered endpoints: NoEndpointError
-    # 2. After the maximum number of retries, no response
-    # was gotten from any endpoint: NoResponseError
-    def call(service_id, version, resource_id, opts = {})
-      retries = opts.delete(:retries) || DEFAULT_RETRIES
-      pause = opts.delete(:pause) || DEFAULT_PAUSE
-      
-      begin
-        endpoint = get_endpoint(service_id, version)
-        raise NoEndpointError.new if endpoint.nil?
-        path = [endpoint, resource_id].compact.join('/')
-        begin
-          return HTTParty.get(path, opts)
-        rescue StandardError
-          retries = retries - 1
-          sleep(pause) if retries > 0
-        end
-      end while retries > 0
+    # 2. None of the registered endpoints respond: NoResponseError
+    def call(opts = {})
+      service_id = opts.delete(:service_id) { raise 'Missing service id' }
+      version = opts.delete(:version) { raise 'Missing version' }
+      base_path = "/companybook/services/#{service_id}/#{version}"
+      resource_id = opts.delete(:id)
 
-      raise NoResponseError.new
+      ZK.open(@cs) do |zk|
+        children = get_children(zk, service_id, version)
+        raise NoEndpointError if children.empty?
+        
+        begin
+          child = children.pop
+          data = JSON.parse(zk.get(base_path + '/' + child).first)
+          endpoint = data['endpoint']
+          path = [endpoint, resource_id].compact.join('/')
+          response = HTTParty.get(path, opts) rescue nil
+          return response unless response.nil?
+        end while children.any?
+
+        raise NoResponseError
+      end
     end
 
     # Lists all the services, versions and instances
@@ -97,6 +95,14 @@ module Vidocq
           {:name => service, :versions => versions}
         end
       end
+    end
+
+    private
+
+    def get_children(zk, id, version)
+      base_path = "/companybook/services/#{id}/#{version}"
+      return [] unless zk.exists?(base_path)
+      zk.children(base_path)
     end
   end
 end
