@@ -24,9 +24,8 @@ Or install it yourself as:
 ## Usage
 ```ruby
 require 'vidocq'
-v = Vidocq.new('localhost:2181')
-url = v.get_endpoint('finance-service','0.1')
-# perform request to url...
+v = Vidocq.new('myzkserver:2181')
+response = v.call('finance-service','0.1','NO0000000995516055')
 ```
 
 ## Contributing
