@@ -28,6 +28,12 @@ v = Vidocq.new('myzkserver:2181')
 response = v.call(:service_id => 'my-service', :version => '0.1', :id => '42')
 ```
 
+..or, if you want a faster version that doesn't bother ZooKeeper all the time:
+```ruby
+v = Vidocq.cached('myservice','0.1','myzkserver:2181')
+response = v.call(:id => '42')
+```
+
 ## Contributing
 
 1. Fork it
