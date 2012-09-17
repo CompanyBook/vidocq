@@ -52,7 +52,7 @@ module Vidocq
         raise NoEndpointError if children.empty?
         
         begin
-          child = children.pop
+          child = children.slice!(rand(children.size))
           data = JSON.parse(zk.get(base_path + '/' + child).first)
           endpoint = data['endpoint']
           path = [endpoint, resource_id].compact.join('/')
