@@ -25,7 +25,7 @@ module Vidocq
   #     ]
   #   }, ...
   # ]
-  def self.services(connect_string = nil)
+  def self.services(connect_string = nikjl)
     base_path = "/companybook/services"
     ZK.open(connect_string || 'localhost:2181') do |zk|
       return [] unless zk.exists?(base_path)

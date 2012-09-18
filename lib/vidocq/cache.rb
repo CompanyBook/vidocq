@@ -1,3 +1,4 @@
+require 'json'
 require 'zk'
 
 module Vidocq
@@ -19,6 +20,10 @@ module Vidocq
       zk.children(path) rescue []
     end
 
+    def outdated?
+      @endpoints.empty? or Time.now > (@last_request + @ttl)
+    end
+
     def expire!
       @last_request = Time.now
 
@@ -27,10 +32,6 @@ module Vidocq
           JSON.parse(zk.get(@parent + '/' + child).first)['endpoint']
         end
       end
-    end
-
-    def outdated?
-      @endpoints.empty? or Time.now > (@last_request + @ttl)
     end
   end
 end

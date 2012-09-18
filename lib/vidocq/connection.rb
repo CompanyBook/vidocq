@@ -1,6 +1,4 @@
 require 'httparty'
-require 'json'
-
 require 'vidocq/cache'
 
 module Vidocq
