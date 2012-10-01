@@ -35,7 +35,7 @@ module Vidocq
       endpoints = @cache.endpoints || []
       if endpoints.empty?
         Vidocq.logger.warn "Got no endpoints; falling back..."
-        endpoints = @fallback
+        endpoints = @fallbacks
       end
       endpoints
     end
