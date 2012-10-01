@@ -18,6 +18,7 @@ module Vidocq
     def call(opts = {})
       resource_id = opts.delete(:id)
 
+      endpoints = get_endpoints
       raise NoEndpointError if endpoints.empty?
         
       begin
@@ -30,15 +31,13 @@ module Vidocq
       raise NoResponseError
     end
 
-    def endpoints
-      eps = @cache.endpoints || []
-
-      if eps.empty?
+    def get_endpoints
+      endpoints = @cache.endpoints || []
+      if endpoints.empty?
         Vidocq.logger.warn "Got no endpoints; falling back..."
-        eps = @fallback
+        endpoints = @fallback
       end
-
-      eps
+      endpoints
     end
   end
 end
