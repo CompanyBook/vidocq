@@ -1,12 +1,20 @@
 require 'zk'
 require 'json'
 require 'vidocq/connection'
+require 'vidocq/railtie' if defined?(Rails::Railtie)
 
 module Vidocq
 
   class NoEndpointError < StandardError; end
   class NoResponseError < StandardError; end
 
+  # Class methods for setting up logger
+  class << self
+    attr_writer :logger
+    def logger; @@logger ||= Logger.new(STDOUT); end
+  end
+
+  # Connection factory
   def self.new(*args, opts)
     Connection.new(*args, opts || {})
   end
