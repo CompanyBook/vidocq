@@ -3,8 +3,9 @@ require 'vidocq/cache'
 
 module Vidocq
   class Connection
-    def initialize(*args, opts)
-      @cache = Cache.new(*args, opts || {})
+    def initialize(sid, version, opts = {})
+      @fallbacks = opts.delete(:fallbacks) || []
+      @cache = Cache.new(sid, version, opts)
     end
 
     # Finds an endpoint and calls it with the given options.
@@ -17,7 +18,6 @@ module Vidocq
     def call(opts = {})
       resource_id = opts.delete(:id)
 
-      endpoints = @cache.endpoints
       raise NoEndpointError if endpoints.empty?
         
       begin
@@ -28,6 +28,11 @@ module Vidocq
       end while endpoints.any?
 
       raise NoResponseError
+    end
+
+    def endpoints
+      endpoints = @cache.endpoints
+      endpoints.empty? ? @fallbacks : endpoints
     end
   end
 end
