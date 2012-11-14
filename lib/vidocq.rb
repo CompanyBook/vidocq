@@ -8,8 +8,16 @@ module Vidocq
   class NoResponseError < StandardError; end
 
   # Connection factory
-  def self.new(*args, opts)
-    Connection.new(*args, opts || {})
+  def self.new(sid, version, opts = {})
+    Connection.new(sid, version, opts || {})
+  end
+
+  def self.logger=(new_logger)
+    @logger = new_logger
+  end
+
+  def self.logger
+    @logger ||= Logger.new(STDOUT)
   end
 
   # Lists all the services, versions and instances

@@ -23,18 +23,26 @@ module Vidocq
       begin
         endpoint = endpoints.slice!(rand(endpoints.size))
         path = [endpoint, resource_id].compact.join('/')
-        response = HTTParty.get(path, opts) rescue nil
-        return response unless response.nil?
+        url = "#{path}?#{build_querystring(opts)}"
+        begin
+          return HTTParty.get(url)
+        rescue Exception => e
+          Vidocq.logger.warn "Error requesting '#{url}': #{e}."
+        end
       end while endpoints.any?
 
       raise NoResponseError
     end
 
-    private
-
     def get_endpoints
       endpoints = @cache.endpoints || []
       endpoints.empty? ? @fallbacks : endpoints
+    end
+
+    private
+
+    def build_querystring(opts = {})
+      opts.collect { |k,v| "#{k}=#{v}" }.join('&')
     end
   end
 end
