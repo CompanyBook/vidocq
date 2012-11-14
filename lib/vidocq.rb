@@ -1,6 +1,7 @@
 require 'zk'
 require 'json'
 require 'vidocq/connection'
+require 'vidocq/railtie' if defined? ::Rails::Railtie
 
 module Vidocq
 

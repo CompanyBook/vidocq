@@ -1,4 +1,5 @@
 require 'httparty'
+require 'open-uri'
 require 'vidocq/cache'
 
 module Vidocq
@@ -19,6 +20,7 @@ module Vidocq
       resource_id = opts.delete(:id)
       endpoints = get_endpoints
       raise NoEndpointError if endpoints.empty?
+      Vidocq.logger.info "Vidocq endpoints: #{endpoints}"
         
       begin
         endpoint = endpoints.slice!(rand(endpoints.size))
@@ -31,6 +33,8 @@ module Vidocq
         end
       end while endpoints.any?
 
+      Vidocq.logger.warn "Vidocq: Unable to reach any of the endpoints"
+
       raise NoResponseError
     end
 
@@ -42,7 +46,7 @@ module Vidocq
     private
 
     def build_querystring(opts = {})
-      opts.collect { |k,v| "#{k}=#{v}" }.join('&')
+      opts.collect { |k,v| "#{k}=#{URI::encode(v.to_s)}" }.join('&')
     end
   end
 end
