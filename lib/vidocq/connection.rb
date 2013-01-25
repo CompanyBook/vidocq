@@ -1,5 +1,5 @@
 require 'httparty'
-require 'open-uri'
+require 'cgi'
 require 'vidocq/cache'
 
 module Vidocq
@@ -46,7 +46,7 @@ module Vidocq
     private
 
     def build_querystring(opts = {})
-      opts.collect { |k,v| "#{k}=#{URI::encode(v.to_s)}" }.join('&')
+      opts.collect { |k,v| "#{k}=#{CGI::escape(v.to_s)}" }.join('&')
     end
   end
 end
