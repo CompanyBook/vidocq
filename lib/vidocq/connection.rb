@@ -46,7 +46,7 @@ module Vidocq
     private
 
     def build_querystring(opts = {})
-      opts.collect { |k,v| "#{k}=#{CGI::escape(v.to_s)}" }.join('&')
+      opts.to_param
     end
   end
 end
