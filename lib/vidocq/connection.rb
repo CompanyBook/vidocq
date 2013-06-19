@@ -41,6 +41,13 @@ module Vidocq
       end
     end
 
+    def put(id, json)
+      with_endpoint do |endpoint|
+        url = "#{endpoint}/#{id}/"
+        return HTTParty.put(url, :body => json, :headers => {'Content-Type' => 'application/json' })
+      end
+    end
+
     # Returns all active endpoints for this service.
     def get_endpoints
       endpoints = @cache.endpoints || []
