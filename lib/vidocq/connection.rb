@@ -1,6 +1,7 @@
 require 'httparty'
 require 'cgi'
 require 'vidocq/cache'
+require 'active_support/core_ext/object'
 
 module Vidocq
   class Connection
@@ -17,27 +18,30 @@ module Vidocq
     # 1. There are no registered endpoints: NoEndpointError
     # 2. None of the registered endpoints respond: NoResponseError
     def call(opts = {})
-      resource_id = opts.delete(:id)
-      endpoints = get_endpoints
-      raise NoEndpointError if endpoints.empty?
-      Vidocq.logger.info "Vidocq endpoints: #{endpoints}"
-        
-      begin
-        endpoint = endpoints.slice!(rand(endpoints.size))
+      with_endpoint do |endpoint|
+        resource_id = opts.delete(:id)
         path = [endpoint, resource_id].compact.join('/')
-        url = "#{path}?#{build_querystring(opts)}"
-        begin
-          return HTTParty.get(url)
-        rescue Exception => e
-          Vidocq.logger.warn "Error requesting '#{url}': #{e}."
-        end
-      end while endpoints.any?
-
-      Vidocq.logger.warn "Vidocq: Unable to reach any of the endpoints"
-
-      raise NoResponseError
+        url = "#{path}?#{opts.to_param}"
+        return HTTParty.get(url)
+      end
     end
 
+    alias_method :get, :call
+
+    # Finds an arbitrary endpoint and does a POST to it
+    # with the given json payload. If there is a connection
+    # failure, new attempts are made with new endpoints.
+    #
+    # Be wary to use this for idempotent operations, as
+    # it is possible that the post is performed twice.
+    def post(json)
+      with_endpoint do |endpoint|
+        url = endpoint + '/'
+        return HTTParty.post(url, :body => json, :headers => {'Content-Type' => 'application/json' })
+      end
+    end
+
+    # Returns all active endpoints for this service.
     def get_endpoints
       endpoints = @cache.endpoints || []
       endpoints.empty? ? @fallbacks : endpoints
@@ -45,8 +49,21 @@ module Vidocq
 
     private
 
-    def build_querystring(opts = {})
-      opts.to_param
+    def with_endpoint(&blk)
+      endpoints = get_endpoints
+      raise NoEndpointError if endpoints.empty?
+      Vidocq.logger.info "Vidocq endpoints: #{endpoints}"
+        
+      begin
+        endpoint = endpoints.slice!(rand(endpoints.size))
+        begin
+          return yield(endpoint) if block_given?
+        rescue Exception => e
+          Vidocq.logger.warn "Error accessing '#{endpoint}': #{e}."
+        end
+      end while endpoints.any?
+
+      raise NoResponseError
     end
   end
 end
