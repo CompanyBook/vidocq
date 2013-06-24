@@ -41,10 +41,21 @@ module Vidocq
       end
     end
 
+    # Finds an arbitrary endpoint and PUTs the given data
+    # as JSON, using the path with the given ID.
     def put(id, json)
       with_endpoint do |endpoint|
         url = "#{endpoint}/#{id}/"
         return HTTParty.put(url, :body => json, :headers => {'Content-Type' => 'application/json' })
+      end
+    end
+
+    # Finds an arbitrary endpoint and issues a DELETE for
+    # the path with the given ID.
+    def delete(id)
+      with_endpoint do |endpoint|
+        url = "#{endpoint}/#{id}/"
+        return HTTParty.delete(url)
       end
     end
 
