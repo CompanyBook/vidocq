@@ -46,7 +46,7 @@ module Vidocq
           instances = zk.children(version_path).collect do |instance|
             JSON.parse(zk.get(version_path + '/' + instance).first)
           end
-          {:number => version, :instances => instances}
+          {:number => version, :instances => instances.uniq}
         end
         {:name => service, :versions => versions}
       end
