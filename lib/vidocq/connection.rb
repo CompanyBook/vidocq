@@ -22,7 +22,7 @@ module Vidocq
         resource_id = opts.delete(:id)
         path = [endpoint, resource_id].compact.join('/')
         url = "#{path}?#{opts.to_param}"
-        return HTTParty.get(url)
+        return HTTParty.get(url, :timeout => 4)
       end
     end
 
@@ -37,7 +37,7 @@ module Vidocq
     def post(json)
       with_endpoint do |endpoint|
         url = endpoint + '/'
-        return HTTParty.post(url, :body => json, :headers => {'Content-Type' => 'application/json' })
+        return HTTParty.post(url, :body => json, :timeout => 4, :headers => {'Content-Type' => 'application/json' })
       end
     end
 
@@ -46,7 +46,7 @@ module Vidocq
     def put(id, json)
       with_endpoint do |endpoint|
         url = "#{endpoint}/#{id}/"
-        return HTTParty.put(url, :body => json, :headers => {'Content-Type' => 'application/json' })
+        return HTTParty.put(url, :body => json, :timeout => 4, :headers => {'Content-Type' => 'application/json' })
       end
     end
 
@@ -55,7 +55,7 @@ module Vidocq
     def delete(id)
       with_endpoint do |endpoint|
         url = "#{endpoint}/#{id}/"
-        return HTTParty.delete(url)
+        return HTTParty.delete(url, :timeout => 4)
       end
     end
 
