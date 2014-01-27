@@ -8,6 +8,7 @@ module Vidocq
     def initialize(sid, version, opts = {})
       @fallbacks = opts.delete(:fallbacks) || []
       @cache = Cache.new(sid, version, opts)
+      @resource_name = opts.delete(:resource_name)
     end
 
     # Finds an endpoint and calls it with the given options.
@@ -19,9 +20,8 @@ module Vidocq
     # 2. None of the registered endpoints respond: NoResponseError
     def call(opts = {})
       with_endpoint do |endpoint|
-        resource_id = opts.delete(:id)
-        path = [endpoint, resource_id].compact.join('/')
-        url = "#{path}?#{opts.to_param}"
+        url  = [endpoint, @resource_name, opts.delete(:id)].compact.join('/')
+        url += "?#{opts.to_param}"
         return HTTParty.get(url, :timeout => 4)
       end
     end
@@ -36,8 +36,8 @@ module Vidocq
     # it is possible that the post is performed twice.
     def post(json)
       with_endpoint do |endpoint|
-        url = endpoint + '/'
-        return HTTParty.post(url, :body => json, :timeout => 4, :headers => {'Content-Type' => 'application/json' })
+        url = [endpoint, @resource_name].compact.join('/')
+        return HTTParty.post(url, :body => json, :timeout => 4, :headers => { 'Content-Type' => 'application/json' })
       end
     end
 
@@ -45,8 +45,8 @@ module Vidocq
     # as JSON, using the path with the given ID.
     def put(id, json)
       with_endpoint do |endpoint|
-        url = "#{endpoint}/#{id}/"
-        return HTTParty.put(url, :body => json, :timeout => 4, :headers => {'Content-Type' => 'application/json' })
+        url = [endpoint, @resource_name, id].compact.join('/')
+        return HTTParty.put(url, :body => json, :timeout => 4, :headers => { 'Content-Type' => 'application/json' })
       end
     end
 
@@ -54,7 +54,7 @@ module Vidocq
     # the path with the given ID.
     def delete(id)
       with_endpoint do |endpoint|
-        url = "#{endpoint}/#{id}/"
+        url = [endpoint, @resource_name, id].compact.join('/')
         return HTTParty.delete(url, :timeout => 4)
       end
     end
