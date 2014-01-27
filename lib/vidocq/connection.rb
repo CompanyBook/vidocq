@@ -36,7 +36,8 @@ module Vidocq
     # it is possible that the post is performed twice.
     def post(json)
       with_endpoint do |endpoint|
-        url = [endpoint, @resource_name].compact.join('/')
+        url  = [endpoint, @resource_name].compact.join('/')
+        url += "/"
         return HTTParty.post(url, :body => json, :timeout => 4, :headers => { 'Content-Type' => 'application/json' })
       end
     end
@@ -45,7 +46,8 @@ module Vidocq
     # as JSON, using the path with the given ID.
     def put(id, json)
       with_endpoint do |endpoint|
-        url = [endpoint, @resource_name, id].compact.join('/')
+        url  = [endpoint, @resource_name, id].compact.join('/')
+        url += "/"        
         return HTTParty.put(url, :body => json, :timeout => 4, :headers => { 'Content-Type' => 'application/json' })
       end
     end
@@ -54,7 +56,8 @@ module Vidocq
     # the path with the given ID.
     def delete(id)
       with_endpoint do |endpoint|
-        url = [endpoint, @resource_name, id].compact.join('/')
+        url  = [endpoint, @resource_name, id].compact.join('/')
+        url += "/"
         return HTTParty.delete(url, :timeout => 4)
       end
     end
